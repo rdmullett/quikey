@@ -10,7 +10,7 @@ import sys
 from quikey.models import Database
 from quikey.directories import AppDirectories
 from quikey.filewatch import InotifyWatch
-from quikey.input import PhraseHandler, Notifier, InputHandler, AlphaNumHandler, DeleteHandler, SpaceHandler
+from quikey.input import PhraseHandler, Notifier, InputHandler, AlphaNumHandler, DeleteHandler, SpaceHandler, SpecialKeyHandler
 
 typelock = Lock()
 
@@ -70,8 +70,8 @@ def main(foreground, buffer_size, trigger_keys):
     i.add_handler(DeleteHandler()) # Special behavior for deletes
     i.add_handler(AlphaNumHandler()) # Standard behavior for everything else
     i.add_handler(SpaceHandler())
+    i.add_handler(SpecialKeyHandler())
     write_pid(appDirs) # Store the current pid
-    listener = Listener(on_press=i)
     with Listener(on_press=i) as listener: # Continue listening until SIGTERM
         signal.signal(signal.SIGTERM, ShutdownHook(listener, watch))
         signal.signal(signal.SIGINT, ShutdownHook(listener, watch))

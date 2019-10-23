@@ -57,6 +57,7 @@ class Notifier:
         self.observers.append(observer)
         
     def notify(self, key):
+        
         # Acquire lock to that any output from an observer hanlding the
         # phrase-key do not get piped back into this app.
         self.lock.acquire()        
@@ -91,7 +92,23 @@ class AlphaNumHandler:
         if key.char is not None:
             keybuff.append(key.char)
         return True
+
+class SpecialKeyHandler:
+    def verify(self, key):
+        return type(key) == Key
+    
+    def onkey(self, key, keybuff):
+        if not self.verify(key):
+            return False
+        if len(keybuff) == keybuff.maxlen:
+            keybuff.popleft()
         
+        keybuff.append(self.encodekey(key))
+        return True
+    
+    def encodekey(self, key):
+        return "<%s>" % str(key)[4:] # strip leading "Key."
+
 class DeleteHandler:
     """
     Handles delete/backspace input, adjusting key input buffer.
